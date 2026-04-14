@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brain Buster - Subjects</title>
+  <link rel="stylesheet" href="quiz2.css">
+</head>
+<body>
+  <button class="theme-toggle" id="toggle-theme" type="button" aria-label="Toggle theme">🌙</button>
+
+  <header class="sub-header">
+    <nav class="navbar">
+      <div class="logo">Brain Buster</div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="subjects.html">Subjects</a></li>
+        <li><a href="admin.html">Admin</a></li>
+      </ul>
+    </nav>
+    <div class="sub-header-inner">
+      <h1>Choose a Subject</h1>
+      <p>Click any subject card to start a timed quiz.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <h2>Subjects</h2>
+      <div class="subject-grid" id="subjectGrid"></div>
+    </section>
+
+    <section class="panel hidden" id="quizPanel">
+      <div class="quiz-topbar">
+        <div class="meta-pill">Subject: <span id="currentSubject">-</span></div>
+        <div class="meta-pill">Time Left: <span id="timeLeft">300</span>s</div>
+        <div class="meta-pill">Questions: <span id="questionCount">0</span></div>
+      </div>
+
+      <div id="quiz"></div>
+
+      <div class="quiz-actions">
+        <button id="submitQuiz" class="btn btn-primary hidden" type="button">Submit Quiz</button>
+        <button id="resetQuiz" class="btn btn-secondary hidden" type="button">Reset</button>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="resultPanel">
+      <h2>Quiz Result</h2>
+      <div class="result-grid">
+        <div class="result-card"><strong>Score</strong><span id="score">0</span></div>
+        <div class="result-card"><strong>Percentage</strong><span id="percentage">0%</span></div>
+        <div class="result-card"><strong>Status</strong><span id="status">-</span></div>
+      </div>
+
+      <form id="saveScoreForm" class="save-score-form">
+        <label for="playerName">Player Name <span aria-hidden="true">*</span></label>
+        <input id="playerName" type="text" placeholder="Enter your name" required>
+        <button type="submit" class="btn btn-primary">Save Score</button>
+      </form>
+
+      <div id="review" class="review-box"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Leaderboard</h2>
+      <div id="leaderboard"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+ 
+   <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <h3>Brain Buster</h3>
+      <p>Learn, practice, and improve with interactive quizzes.</p>
+    </div>
+
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="subjects.html">Subjects</a>
+      <a href="admin.html">Admin</a>
+      <a href="login.html">Login</a>
+      <a href="signup.html">Sign Up</a>
+    </div>
+
+    <section id="copyright">
+      <p>© 2025 Yash Bansal. All rights reserved.</p>
+    </section>
+  </div>
+</footer>
+
+</body>
+</html>

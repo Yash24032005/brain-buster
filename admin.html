@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brain Buster - Admin Panel</title>
+  <link rel="stylesheet" href="quiz2.css">
+</head>
+<body>
+  <button class="theme-toggle" id="toggle-theme" type="button" aria-label="Toggle theme">🌙</button>
+
+  <header class="sub-header">
+    <nav class="navbar">
+      <div class="logo">Brain Buster Admin</div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="subjects.html">Subjects</a></li>
+        <li><a href="admin.html">Admin</a></li>
+      </ul>
+    </nav>
+    <div class="sub-header-inner">
+      <h1>Question Editor</h1>
+      <p>Add custom quiz questions for any subject and store them in your browser.</p>
+    </div>
+  </header>
+
+  <main class="container admin-layout">
+    <section class="panel">
+      <h2>Add Question</h2>
+      <form id="adminForm" class="admin-form">
+        <label for="adminSubject">Subject <span aria-hidden="true">*</span></label>
+        <select id="adminSubject" required>
+          <option value="">Select subject</option>
+          <option value="history">History</option>
+          <option value="gk">General Knowledge</option>
+          <option value="english">English</option>
+          <option value="science">Science</option>
+          <option value="math">Math</option>
+          <option value="html">HTML</option>
+          <option value="css">CSS</option>
+          <option value="javascript">JavaScript</option>
+          <option value="bootstrap">Bootstrap</option>
+          <option value="php">PHP</option>
+          <option value="java">Java</option>
+          <option value="c">C</option>
+          <option value="cpp">C++</option>
+          <option value="python">Python</option>
+          <option value="sql">SQL</option>
+          <option value="aptitude">Aptitude</option>
+          <option value="reasoning">Reasoning</option>
+        </select>
+
+        <label for="questionText">Question <span aria-hidden="true">*</span></label>
+        <textarea id="questionText" required placeholder="Enter question text"></textarea>
+
+        <label for="option1">Option 1 <span aria-hidden="true">*</span></label>
+        <input id="option1" type="text" required>
+
+        <label for="option2">Option 2 <span aria-hidden="true">*</span></label>
+        <input id="option2" type="text" required>
+
+        <label for="option3">Option 3 <span aria-hidden="true">*</span></label>
+        <input id="option3" type="text" required>
+
+        <label for="option4">Option 4 <span aria-hidden="true">*</span></label>
+        <input id="option4" type="text" required>
+
+        <label for="correctAnswer">Correct Answer <span aria-hidden="true">*</span></label>
+        <input id="correctAnswer" type="text" required placeholder="Must match one option exactly">
+
+        <div class="admin-actions">
+          <button type="submit" class="btn btn-primary">Add Question</button>
+          <button type="button" class="btn btn-secondary" id="clearCustomQuestions">Clear Custom Questions</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Custom Questions</h2>
+      <div id="customQuestionsList"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <h3>Brain Buster</h3>
+      <p>Learn, practice, and improve with interactive quizzes.</p>
+    </div>
+
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="subjects.html">Subjects</a>
+      <a href="admin.html">Admin</a>
+      <a href="login.html">Login</a>
+      <a href="signup.html">Sign Up</a>
+    </div>
+
+    <section id="copyright">
+      <p>© 2025 Yash Bansal. All rights reserved.</p>
+    </section>
+  </div>
+</footer>
+
+
+</body>
+</html>
