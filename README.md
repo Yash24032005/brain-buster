@@ -2,7 +2,7 @@
 
 **Brain Buster** is a modern, interactive quiz platform designed to help students and learners practice school subjects, coding, aptitude, and reasoning. With a clean UI and a focus on speed, it provides an engaging environment for self-assessment.
 
-Preview url
+Preview url https://yash24032005.github.io/brain-buster/
 
 ## 🚀 Features
 
