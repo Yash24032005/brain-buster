@@ -265,7 +265,7 @@ function resetQuiz() {
 
 // --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Render Subjects Grid
+    // Render Subjects Grid
     const grid = $("subjectGrid");
     if (grid) {
         grid.innerHTML = Object.entries(SUBJECTS).map(([key, item]) => `
@@ -273,35 +273,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="w-12 h-12 bg-indigo-500/20 rounded-2xl mx-auto mb-4 flex items-center justify-center text-indigo-400 font-bold group-hover:scale-110 transition">
                     ${key.substring(0, 2).toUpperCase()}
                 </div>
-                <h3 class="text-lg font-bold text-white uppercase tracking-wider">${item.title}</h3>
+                <h3 class="text-lg font-bold text-white uppercase">${item.title}</h3>
             </div>
         `).join('');
     }
 
-    // 2. Quiz Action Listeners
+    // Button Listeners
     if ($("submitQuiz")) $("submitQuiz").onclick = () => submitQuiz(false);
     if ($("resetQuiz")) $("resetQuiz").onclick = resetQuiz;
     
-    // 3. Authentication Listeners (New Update)
-    if ($("signupForm")) $("signupForm").onsubmit = handleSignup;
-    if ($("loginForm")) $("loginForm").onsubmit = handleLogin;
-
-    // 4. Save Score Logic (Upgraded with User Auto-Detection)
+    // Save Score Logic
     const scoreForm = $("saveScoreForm");
     if (scoreForm) {
-        // Automatically fill name if user is logged in
-        const activeUser = JSON.parse(localStorage.getItem("brain_buster_active_user"));
-        if (activeUser && $("playerName")) {
-            $("playerName").value = activeUser.name;
-        }
-
         scoreForm.onsubmit = (e) => {
             e.preventDefault();
-            const nameInput = $("playerName").value.trim();
-            if (!nameInput) return alert("Please enter or verify your name!");
+            const name = $("playerName").value.trim();
+            if (!name) return;
 
             const entry = {
-                name: nameInput,
+                name,
                 subject: SUBJECTS[activeSubjectKey].title,
                 score: $("score").textContent,
                 percent: $("percentage").textContent,
@@ -311,15 +301,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const lb = getLeaderboard();
             lb.push(entry);
             saveLeaderboard(lb.sort((a, b) => parseInt(b.score) - parseInt(a.score)));
-            
-            alert("Score saved successfully! 🏆");
+            alert("Score saved!");
             location.reload();
         };
-    }
-
-    // 5. Leaderboard Render (Page load par ranking dikhane ke liye)
-    if ($("leaderboard")) {
-        renderLeaderboard();
     }
 });
 
@@ -350,42 +334,3 @@ function renderLeaderboard() {
     `).join('');
 };
 
-// --- AUTHENTICATION LOGIC ---
-const USERS_KEY = "brain_buster_users";
-const CURRENT_USER_KEY = "brain_buster_active_user";
-
-const $ = (id) => document.getElementById(id); // Agar pehle se upar define hai toh ise skip kar dena
-
-// SIGNUP FUNCTION
-function handleSignup(e) {
-    e.preventDefault();
-    const name = $("signupName").value.trim();
-    const email = $("signupEmail").value.trim();
-    const password = $("signupPassword").value.trim();
-
-    let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
-    if (users.find(u => u.email === email)) return alert("User already exists!");
-
-    users.push({ name, email, password });
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    alert("Account created! Please login.");
-    window.location.href = "login.html";
-}
-
-// LOGIN FUNCTION
-function handleLogin(e) {
-    e.preventDefault();
-    const email = $("loginEmail").value.trim();
-    const password = $("loginPassword").value.trim();
-
-    let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (user) {
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-        alert(`Welcome back, ${user.name}!`);
-        window.location.href = "index.html";
-    } else {
-        alert("Invalid email or password!");
-    }
-}
