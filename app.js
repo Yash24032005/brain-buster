@@ -1,23 +1,26 @@
+
+// --- CONFIGURATION ---
 const SUBJECTS = {
-  history: { title: "History", image: "assets/history.jpg" },
-  gk: { title: "General Knowledge", image: "assets/gk.jpg" },
-  english: { title: "English", image: "assets/english.jpg" },
-  science: { title: "Science", image: "assets/science.jpg" },
-  math: { title: "Math", image: "assets/math.jpg" },
-  html: { title: "HTML", image: "assets/html.jpg" },
-  css: { title: "CSS", image: "assets/css.jpg" },
-  javascript: { title: "JavaScript", image: "assets/javascript.jpg" },
-  bootstrap: { title: "Bootstrap", image: "assets/bootstrap.jpg" },
-  php: { title: "PHP", image: "assets/php.jpg" },
-  java: { title: "Java", image: "assets/java.jpg" },
-  c: { title: "C", image: "assets/c.jpg" },
-  cpp: { title: "C++", image: "assets/cpp.jpg" },
-  python: { title: "Python", image: "assets/python.jpg" },
-  sql: { title: "SQL", image: "assets/sql.jpg" },
-  aptitude: { title: "Aptitude", image: "assets/aptitude.jpg" },
-  reasoning: { title: "Reasoning", image: "assets/reasoning.jpg" }
+    history: { title: "History", image: "assets/history.jpg" },
+    gk: { title: "General Knowledge", image: "assets/gk.jpg" },
+    english: { title: "English", image: "assets/english.jpg" },
+    science: { title: "Science", image: "assets/science.jpg" },
+    math: { title: "Math", image: "assets/math.jpg" },
+    html: { title: "HTML", image: "assets/html.jpg" },
+    css: { title: "CSS", image: "assets/css.jpg" },
+    javascript: { title: "JavaScript", image: "assets/js.jpg" },
+    bootstrap: { title: "Bootstrap", image: "assets/bootstrap.jpg" },
+    php: { title: "PHP", image: "assets/php.jpg" },
+    java: { title: "Java", image: "assets/java.jpg" },
+    c: { title: "C", image: "assets/c.jpg" },
+    cpp: { title: "C++", image: "assets/cpp.jpg" },
+    python: { title: "Python", image: "assets/python.jpg" },
+    sql: { title: "SQL", image: "assets/sql.jpg" },
+    aptitude: { title: "Aptitude", image: "assets/aptitude.jpg" },
+    reasoning: { title: "Reasoning", image: "assets/reasoning.jpg" }
 };
 
+// Base Questions (Keep your image_695cf8 questions here)
 const BASE_QUESTIONS = {
   history: [
     { question: "Who was the first President of the United States?", options: ["Abraham Lincoln", "George Washington", "John Adams", "Thomas Jefferson"], answer: "George Washington" },
@@ -140,342 +143,249 @@ const BASE_QUESTIONS = {
   ]
 };
 
+
 const CUSTOM_QUESTIONS_KEY = "brain_buster_custom_questions";
 const LEADERBOARD_KEY = "brain_buster_leaderboard";
-const THEME_KEY = "brain_buster_theme";
 
 let activeSubjectKey = null;
 let activeQuestions = [];
 let quizTimer = null;
-let timeLeft = 60;
+let timeLeft = 300;
 
-function $(id) {
-  return document.getElementById(id);
-}
-
-function getCustomQuestions() {
-  return JSON.parse(localStorage.getItem(CUSTOM_QUESTIONS_KEY) || "{}");
-}
-
-function saveCustomQuestions(data) {
-  localStorage.setItem(CUSTOM_QUESTIONS_KEY, JSON.stringify(data));
-}
-
-function getLeaderboard() {
-  return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]");
-}
-
-function saveLeaderboard(data) {
-  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(data));
-}
+// --- HELPERS ---
+const $ = (id) => document.getElementById(id);
+const getCustomQuestions = () => JSON.parse(localStorage.getItem(CUSTOM_QUESTIONS_KEY)) || {};
+const saveCustomQuestions = (data) => localStorage.setItem(CUSTOM_QUESTIONS_KEY, JSON.stringify(data));
+const getLeaderboard = () => JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || [];
+const saveLeaderboard = (data) => localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(data));
 
 function shuffleArray(array) {
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
+    return array.sort(() => Math.random() - 0.5);
 }
 
 function getAllQuestionsForSubject(subjectKey) {
-  const custom = getCustomQuestions();
-  const base = BASE_QUESTIONS[subjectKey] || [];
-  const extra = custom[subjectKey] || [];
-  return [...base, ...extra];
+    const custom = getCustomQuestions();
+    const base = BASE_QUESTIONS[subjectKey] || [];
+    const extra = custom[subjectKey] || [];
+    return [...base, ...extra];
 }
 
-function initTheme() {
-  const btn = $("toggle-theme");
-  const savedTheme = localStorage.getItem(THEME_KEY);
-  if (savedTheme === "dark") {
-    document.body.classList.add("dark-mode");
-  }
-  if (btn) {
-    btn.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
-    btn.addEventListener("click", () => {
-      document.body.classList.toggle("dark-mode");
-      const dark = document.body.classList.contains("dark-mode");
-      localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
-      btn.textContent = dark ? "☀️" : "🌙";
-    });
-  }
-}
-
-function renderSubjectCards() {
-  const grid = $("subjectGrid");
-  if (!grid) return;
-
-  grid.innerHTML = Object.entries(SUBJECTS).map(([key, item]) => `
-    <button class="subject-card" type="button" data-subject="${key}">
-      <img src="${item.image}" alt="${item.title}" loading="lazy">
-      <div class="overlay">
-        <h3>${item.title}</h3>
-      </div>
-    </button>
-  `).join("");
-
-  grid.querySelectorAll(".subject-card").forEach((card) => {
-    card.addEventListener("click", () => startQuiz(card.dataset.subject));
-  });
-}
-
+// --- QUIZ LOGIC ---
 function startQuiz(subjectKey) {
-  activeSubjectKey = subjectKey;
-  const allQuestions = getAllQuestionsForSubject(subjectKey);
-  activeQuestions = shuffleArray(allQuestions).slice(0, Math.min(5, allQuestions.length));
+    activeSubjectKey = subjectKey;
+    const allQs = getAllQuestionsForSubject(subjectKey);
+    if (allQs.length === 0) return alert("No questions found for this subject!");
 
-  $("quizPanel").classList.remove("hidden");
-  $("resultPanel").classList.add("hidden");
-  $("currentSubject").textContent = SUBJECTS[subjectKey].title;
-  $("questionCount").textContent = activeQuestions.length;
-  $("submitQuiz").classList.remove("hidden");
-  $("resetQuiz").classList.remove("hidden");
+    activeQuestions = shuffleArray(allQs).slice(0, 10); // Limit to 10 for interactive feel
+    
+    $("subjectSelection").classList.add("hidden");
+    $("quizPanel").classList.remove("hidden");
+    $("resultPanel").classList.add("hidden");
+    
+    $("currentSubject").textContent = SUBJECTS[subjectKey].title;
+    $("questionCount").textContent = activeQuestions.length;
+    
+    $("submitQuiz").classList.remove("hidden");
+    $("resetQuiz").classList.remove("hidden");
 
-  renderQuizQuestions();
-  startTimer();
-  window.scrollTo({ top: $("quizPanel").offsetTop - 10, behavior: "smooth" });
+    renderQuizQuestions();
+    startTimer();
 }
 
 function renderQuizQuestions() {
-  const quiz = $("quiz");
-  if (!quiz) return;
-
-  quiz.innerHTML = activeQuestions.map((q, index) => {
-    const shuffledOptions = shuffleArray(q.options);
-    return `
-      <article class="question-block">
-        <h3>Q${index + 1}. ${q.question}</h3>
-        <div class="options">
-          ${shuffledOptions.map(option => `
-            <label>
-              <input type="radio" name="question_${index}" value="${escapeHtml(option)}">
-              ${option}
-            </label>
-          `).join("")}
+    const container = $("quiz");
+    container.innerHTML = activeQuestions.map((q, idx) => `
+        <div class="mb-8 p-6 bg-white/5 rounded-2xl border border-white/10">
+            <h3 class="text-lg font-bold text-white mb-4">${idx + 1}. ${q.question}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                ${q.options.map(opt => `
+                    <label class="flex items-center p-4 bg-slate-800/50 rounded-xl border border-white/5 cursor-pointer hover:border-indigo-500 transition">
+                        <input type="radio" name="q${idx}" value="${opt}" class="w-4 h-4 text-indigo-600 mr-3">
+                        <span class="text-slate-300">${opt}</span>
+                    </label>
+                `).join('')}
+            </div>
         </div>
-      </article>
-    `;
-  }).join("");
+    `).join('');
 }
 
 function startTimer() {
-  clearInterval(quizTimer);
-  timeLeft = 60;
-  $("timeLeft").textContent = timeLeft;
-
-  quizTimer = setInterval(() => {
-    timeLeft -= 1;
+    clearInterval(quizTimer);
+    timeLeft = 300;
     $("timeLeft").textContent = timeLeft;
-    if (timeLeft <= 0) {
-      clearInterval(quizTimer);
-      submitQuiz(true);
-    }
-  }, 1000);
+    quizTimer = setInterval(() => {
+        timeLeft--;
+        $("timeLeft").textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(quizTimer);
+            submitQuiz(true);
+        }
+    }, 1000);
 }
 
-function submitQuiz(autoSubmitted = false) {
-  clearInterval(quizTimer);
+function submitQuiz(autoSub = false) {
+    clearInterval(quizTimer);
+    let score = 0;
+    
+    const reviewHTML = activeQuestions.map((q, idx) => {
+        const selected = document.querySelector(`input[name="q${idx}"]:checked`);
+        const userAns = selected ? selected.value : "Not Answered";
+        const isCorrect = userAns === q.answer;
+        if (isCorrect) score++;
 
-  let score = 0;
-  const reviewHTML = activeQuestions.map((q, index) => {
-    const selected = document.querySelector(`input[name="question_${index}"]:checked`);
-    const userAnswer = selected ? selected.value : "Not Answered";
-    const correct = userAnswer === q.answer;
-    if (correct) score += 1;
+        return `
+            <div class="p-4 rounded-xl mb-3 ${isCorrect ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-red-500/10 border border-red-500/30'}">
+                <p class="font-bold text-white">${idx + 1}. ${q.question}</p>
+                <p class="text-sm ${isCorrect ? 'text-emerald-400' : 'text-red-400'}">Your Answer: ${userAns}</p>
+                <p class="text-sm text-slate-400">Correct: ${q.answer}</p>
+            </div>
+        `;
+    }).join('');
 
-    return `
-      <div class="review-item ${correct ? "correct" : "wrong"}">
-        <p><strong>Question:</strong> ${q.question}</p>
-        <p><strong>Your Answer:</strong> ${userAnswer}</p>
-        <p><strong>Correct Answer:</strong> ${q.answer}</p>
-      </div>
-    `;
-  }).join("");
-
-  const percentage = Math.round((score / activeQuestions.length) * 100);
-  const status = percentage >= 40 ? "Pass" : "Fail";
-
-  $("score").textContent = score;
-  $("percentage").textContent = `${percentage}%`;
-  $("status").textContent = status;
-  $("review").innerHTML = reviewHTML;
-  $("resultPanel").classList.remove("hidden");
-
-  if (autoSubmitted) {
-    alert("Time is up. Quiz submitted automatically.");
-  }
-
-  window.scrollTo({ top: $("resultPanel").offsetTop - 10, behavior: "smooth" });
-
-  const form = $("saveScoreForm");
-  if (form) {
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      const playerName = $("playerName").value.trim();
-      if (!playerName) return;
-
-      const leaderboard = getLeaderboard();
-      leaderboard.push({
-        name: playerName,
-        subject: SUBJECTS[activeSubjectKey].title,
-        score,
-        percentage,
-        status,
-        total: activeQuestions.length,
-        date: new Date().toLocaleString()
-      });
-
-      leaderboard.sort((a, b) => b.percentage - a.percentage || b.score - a.score);
-      saveLeaderboard(leaderboard.slice(0, 20));
-      renderLeaderboard();
-      form.reset();
-      alert("Score saved successfully.");
-    };
-  }
+    const percent = Math.round((score / activeQuestions.length) * 100);
+    
+    $("score").textContent = score;
+    $("percentage").textContent = percent + "%";
+    $("review").innerHTML = reviewHTML;
+    
+    $("quizPanel").classList.add("hidden");
+    $("resultPanel").classList.remove("hidden");
+    
+    if (autoSub) alert("Time is up! Quiz submitted.");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function resetQuiz() {
-  clearInterval(quizTimer);
-  activeSubjectKey = null;
-  activeQuestions = [];
-  $("quiz").innerHTML = "";
-  $("quizPanel").classList.add("hidden");
-  $("resultPanel").classList.add("hidden");
-  $("timeLeft").textContent = "60";
+    clearInterval(quizTimer);
+    $("quizPanel").classList.add("hidden");
+    $("resultPanel").classList.add("hidden");
+    $("subjectSelection").classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// --- INITIALIZATION ---
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Render Subjects Grid
+    const grid = $("subjectGrid");
+    if (grid) {
+        grid.innerHTML = Object.entries(SUBJECTS).map(([key, item]) => `
+            <div onclick="startQuiz('${key}')" class="glass-card p-6 rounded-3xl subject-card transition-all cursor-pointer text-center group">
+                <div class="w-12 h-12 bg-indigo-500/20 rounded-2xl mx-auto mb-4 flex items-center justify-center text-indigo-400 font-bold group-hover:scale-110 transition">
+                    ${key.substring(0, 2).toUpperCase()}
+                </div>
+                <h3 class="text-lg font-bold text-white uppercase tracking-wider">${item.title}</h3>
+            </div>
+        `).join('');
+    }
+
+    // 2. Quiz Action Listeners
+    if ($("submitQuiz")) $("submitQuiz").onclick = () => submitQuiz(false);
+    if ($("resetQuiz")) $("resetQuiz").onclick = resetQuiz;
+    
+    // 3. Authentication Listeners (New Update)
+    if ($("signupForm")) $("signupForm").onsubmit = handleSignup;
+    if ($("loginForm")) $("loginForm").onsubmit = handleLogin;
+
+    // 4. Save Score Logic (Upgraded with User Auto-Detection)
+    const scoreForm = $("saveScoreForm");
+    if (scoreForm) {
+        // Automatically fill name if user is logged in
+        const activeUser = JSON.parse(localStorage.getItem("brain_buster_active_user"));
+        if (activeUser && $("playerName")) {
+            $("playerName").value = activeUser.name;
+        }
+
+        scoreForm.onsubmit = (e) => {
+            e.preventDefault();
+            const nameInput = $("playerName").value.trim();
+            if (!nameInput) return alert("Please enter or verify your name!");
+
+            const entry = {
+                name: nameInput,
+                subject: SUBJECTS[activeSubjectKey].title,
+                score: $("score").textContent,
+                percent: $("percentage").textContent,
+                date: new Date().toLocaleDateString()
+            };
+
+            const lb = getLeaderboard();
+            lb.push(entry);
+            saveLeaderboard(lb.sort((a, b) => parseInt(b.score) - parseInt(a.score)));
+            
+            alert("Score saved successfully! 🏆");
+            location.reload();
+        };
+    }
+
+    // 5. Leaderboard Render (Page load par ranking dikhane ke liye)
+    if ($("leaderboard")) {
+        renderLeaderboard();
+    }
+});
 
 function renderLeaderboard() {
-  const box = $("leaderboard");
-  if (!box) return;
+    const box = $("leaderboard");
+    if (!box) return;
+    const data = getLeaderboard();
+    
+    if (data.length === 0) {
+        box.innerHTML = `<p class="text-slate-500 text-center py-4 italic">No scores yet. Be the first!</p>`;
+        return;
+    }
 
-  const data = getLeaderboard();
-  if (!data.length) {
-    box.innerHTML = "<p>No saved scores yet.</p>";
-    return;
-  }
+    box.innerHTML = data.slice(0, 5).map((item, index) => `
+        <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl mb-2 border border-white/5">
+            <div class="flex items-center gap-4">
+                <span class="text-indigo-400 font-bold">#${index + 1}</span>
+                <div>
+                    <p class="text-white font-semibold">${item.name}</p>
+                    <p class="text-xs text-slate-500">${item.subject}</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-indigo-400 font-bold">${item.percent}</p>
+                <p class="text-[10px] text-slate-600">${item.date}</p>
+            </div>
+        </div>
+    `).join('');
+};
 
-  box.innerHTML = `
-    <table class="leaderboard-table">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Name</th>
-          <th>Subject</th>
-          <th>Score</th>
-          <th>Percentage</th>
-          <th>Status</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${data.map((item, index) => `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${escapeHtml(item.name)}</td>
-            <td>${escapeHtml(item.subject)}</td>
-            <td>${item.score}/${item.total}</td>
-            <td>${item.percentage}%</td>
-            <td>${item.status}</td>
-            <td>${escapeHtml(item.date)}</td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-}
+// --- AUTHENTICATION LOGIC ---
+const USERS_KEY = "brain_buster_users";
+const CURRENT_USER_KEY = "brain_buster_active_user";
 
-function renderCustomQuestions() {
-  const box = $("customQuestionsList");
-  if (!box) return;
+const $ = (id) => document.getElementById(id); // Agar pehle se upar define hai toh ise skip kar dena
 
-  const custom = getCustomQuestions();
-  const items = Object.entries(custom).flatMap(([subject, questions]) =>
-    questions.map((q, index) => ({ subject, index, ...q }))
-  );
-
-  if (!items.length) {
-    box.innerHTML = "<p>No custom questions added yet.</p>";
-    return;
-  }
-
-  box.innerHTML = items.map(item => `
-    <div class="custom-question-card">
-      <p><strong>Subject:</strong> ${SUBJECTS[item.subject]?.title || item.subject}</p>
-      <p><strong>Question:</strong> ${escapeHtml(item.question)}</p>
-      <p><strong>Options:</strong> ${item.options.map(escapeHtml).join(", ")}</p>
-      <p><strong>Answer:</strong> ${escapeHtml(item.answer)}</p>
-    </div>
-  `).join("");
-}
-
-function setupAdminForm() {
-  const form = $("adminForm");
-  if (!form) return;
-
-  form.addEventListener("submit", (e) => {
+// SIGNUP FUNCTION
+function handleSignup(e) {
     e.preventDefault();
+    const name = $("signupName").value.trim();
+    const email = $("signupEmail").value.trim();
+    const password = $("signupPassword").value.trim();
 
-    const subject = $("adminSubject").value;
-    const question = $("questionText").value.trim();
-    const options = [
-      $("option1").value.trim(),
-      $("option2").value.trim(),
-      $("option3").value.trim(),
-      $("option4").value.trim()
-    ];
-    const answer = $("correctAnswer").value.trim();
+    let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+    if (users.find(u => u.email === email)) return alert("User already exists!");
 
-    if (!subject || !question || options.some(opt => !opt) || !answer) {
-      alert("Please fill all required fields.");
-      return;
-    }
-
-    if (!options.includes(answer)) {
-      alert("Correct answer must exactly match one option.");
-      return;
-    }
-
-    const custom = getCustomQuestions();
-    if (!custom[subject]) custom[subject] = [];
-    custom[subject].push({ question, options, answer });
-    saveCustomQuestions(custom);
-
-    form.reset();
-    renderCustomQuestions();
-    alert("Question added successfully.");
-  });
-
-  const clearBtn = $("clearCustomQuestions");
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      const confirmed = confirm("Clear all custom questions?");
-      if (!confirmed) return;
-      localStorage.removeItem(CUSTOM_QUESTIONS_KEY);
-      renderCustomQuestions();
-    });
-  }
+    users.push({ name, email, password });
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    alert("Account created! Please login.");
+    window.location.href = "login.html";
 }
 
-function escapeHtml(text) {
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+// LOGIN FUNCTION
+function handleLogin(e) {
+    e.preventDefault();
+    const email = $("loginEmail").value.trim();
+    const password = $("loginPassword").value.trim();
+
+    let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+    const user = users.find(u => u.email === email && u.password === password);
+
+    if (user) {
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+        alert(`Welcome back, ${user.name}!`);
+        window.location.href = "index.html";
+    } else {
+        alert("Invalid email or password!");
+    }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  initTheme();
-  renderSubjectCards();
-  renderLeaderboard();
-  renderCustomQuestions();
-  setupAdminForm();
-
-  const submitBtn = $("submitQuiz");
-  const resetBtn = $("resetQuiz");
-
-  if (submitBtn) submitBtn.addEventListener("click", () => submitQuiz(false));
-  if (resetBtn) resetBtn.addEventListener("click", resetQuiz);
-});

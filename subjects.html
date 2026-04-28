@@ -1,95 +1,113 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brain Buster - Subjects</title>
-  <link rel="stylesheet" href="quiz2.css">
+  <title>Brain Buster - Choose Subject</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; }
+    
+    .glass-card { 
+      background: rgba(30, 41, 59, 0.5); 
+      -webkit-backdrop-filter: blur(10px); 
+      backdrop-filter: blur(10px); 
+      border: 1px solid rgba(255, 255, 255, 0.05); 
+    }
+    .subject-card:hover { border-color: #6366f1; box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); transform: translateY(-5px); }
+    .meta-pill { background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); padding: 6px 16px; border-radius: 99px; font-weight: 600; color: #818cf8; }
+    .hidden { display: none; }
+  </style>
 </head>
-<body>
-  <button class="theme-toggle" id="toggle-theme" type="button" aria-label="Toggle theme">🌙</button>
+<body class="text-slate-200">
 
-  <header class="sub-header">
-    <nav class="navbar">
-      <div class="logo">Brain Buster</div>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="subjects.html">Subjects</a></li>
-        <li><a href="admin.html">Admin</a></li>
+  <nav class="fixed w-full z-50 top-0 bg-[#0f172a]/80 backdrop-blur-md border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Brain Buster</a>
+      <ul class="flex space-x-6 font-medium text-sm text-slate-400">
+        <li><a href="index.html" class="hover:text-white">Home</a></li>
+        <li><a href="subjects.html" class="text-white">Subjects</a></li>
+        <li><a href="admin.html" class="hover:text-white">Admin</a></li>
       </ul>
-    </nav>
-    <div class="sub-header-inner">
-      <h1>Choose a Subject</h1>
-      <p>Click any subject card to start a timed quiz.</p>
     </div>
+  </nav>
+
+  <header class="pt-32 pb-12 px-6 text-center">
+    <h1 class="text-4xl font-extrabold text-white">Choose Your Challenge</h1>
+    <p class="text-slate-400 mt-3">Select a subject to test your skills under the clock.</p>
   </header>
 
-  <main class="container">
-    <section class="panel">
-      <h2>Subjects</h2>
-      <div class="subject-grid" id="subjectGrid"></div>
+  <main class="max-w-7xl mx-auto px-6 pb-24 space-y-12">
+    
+    <section id="subjectSelection">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="subjectGrid">
+        </div>
     </section>
 
-    <section class="panel hidden" id="quizPanel">
-      <div class="quiz-topbar">
-        <div class="meta-pill">Subject: <span id="currentSubject">-</span></div>
-        <div class="meta-pill">Time Left: <span id="timeLeft">300</span>s</div>
-        <div class="meta-pill">Questions: <span id="questionCount">0</span></div>
+    <section id="quizPanel" class="hidden">
+      <div class="max-w-3xl mx-auto glass-card p-8 rounded-[2.5rem] shadow-2xl">
+        <div class="flex flex-wrap gap-3 justify-center mb-10">
+          <div class="meta-pill">📚 <span id="currentSubject">-</span></div>
+          <div class="meta-pill text-amber-400 border-amber-500/20 bg-amber-500/10">⏱️ <span id="timeLeft">300</span>s</div>
+          <div class="meta-pill">❓ Q: <span id="questionCount">0</span></div>
+        </div>
+
+        <div id="quiz" class="min-h-[300px]">
+          </div>
+
+        <div class="mt-10 flex gap-4">
+          <button id="submitQuiz" class="hidden flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-500/20 transition-all">Submit Quiz</button>
+          <button id="resetQuiz" class="hidden px-8 py-4 border border-white/10 rounded-2xl hover:bg-white/5 transition-all text-slate-400">Reset</button>
+        </div>
       </div>
-
-      <div id="quiz"></div>
-
-      <div class="quiz-actions">
-        <button id="submitQuiz" class="btn btn-primary hidden" type="button">Submit Quiz</button>
-        <button id="resetQuiz" class="btn btn-secondary hidden" type="button">Reset</button>
-      </div>
     </section>
 
-    <section class="panel hidden" id="resultPanel">
-      <h2>Quiz Result</h2>
-      <div class="result-grid">
-        <div class="result-card"><strong>Score</strong><span id="score">0</span></div>
-        <div class="result-card"><strong>Percentage</strong><span id="percentage">0%</span></div>
-        <div class="result-card"><strong>Status</strong><span id="status">-</span></div>
-      </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <section id="resultPanel" class="hidden lg:col-span-5">
+        <div class="glass-card p-8 rounded-3xl border-emerald-500/20">
+          <h2 class="text-2xl font-bold text-white mb-6">Quiz Result</h2>
+          <div class="grid grid-cols-2 gap-4 mb-8 text-center">
+            <div class="p-4 bg-white/5 rounded-2xl">
+              <span class="block text-xs uppercase tracking-widest text-slate-500 mb-1">Score</span>
+              <span id="score" class="text-3xl font-black text-indigo-400">0</span>
+            </div>
+            <div class="p-4 bg-white/5 rounded-2xl">
+              <span class="block text-xs uppercase tracking-widest text-slate-500 mb-1">Percentage</span>
+              <span id="percentage" class="text-3xl font-black text-indigo-400">0%</span>
+            </div>
+          </div>
 
-      <form id="saveScoreForm" class="save-score-form">
-        <label for="playerName">Player Name <span aria-hidden="true">*</span></label>
-        <input id="playerName" type="text" placeholder="Enter your name" required>
-        <button type="submit" class="btn btn-primary">Save Score</button>
-      </form>
+          <form id="saveScoreForm" class="space-y-4">
+            <input id="playerName" type="text" placeholder="Your Name" class="w-full bg-slate-900/50 border border-white/10 rounded-xl p-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none" required>
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-500/20">Save to Leaderboard</button>
+          </form>
+          
+          <div id="review" class="mt-8 space-y-4 max-h-60 overflow-y-auto pr-2 custom-scrollbar"></div>
+        </div>
+      </section>
 
-      <div id="review" class="review-box"></div>
-    </section>
+      <section class="lg:col-span-7">
+        <div class="glass-card p-8 rounded-3xl">
+          <h2 class="text-2xl font-bold text-white mb-6 flex justify-between items-center">
+            Hall of Fame 🏆
+            <span class="text-xs font-normal text-slate-500 uppercase tracking-widest">Top Scores</span>
+          </h2>
+          <div id="leaderboard" class="space-y-3">
+            </div>
+        </div>
+      </section>
 
-    <section class="panel">
-      <h2>Leaderboard</h2>
-      <div id="leaderboard"></div>
-    </section>
+    </div>
   </main>
 
+  <footer class="py-12 text-center border-t border-white/5 opacity-50 text-sm">
+    <p>© 2026 Yash Bansal • Built for Galgotias College</p>
+  </footer>
+
   <script src="app.js"></script>
- 
-   <footer class="site-footer">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <h3>Brain Buster</h3>
-      <p>Learn, practice, and improve with interactive quizzes.</p>
-    </div>
-
-    <div class="footer-links">
-      <a href="index.html">Home</a>
-      <a href="subjects.html">Subjects</a>
-      <a href="admin.html">Admin</a>
-      <a href="login.html">Login</a>
-      <a href="signup.html">Sign Up</a>
-    </div>
-
-    <section id="copyright">
-      <p>© 2025 Yash Bansal. All rights reserved.</p>
-    </section>
-  </div>
-</footer>
-
 </body>
 </html>
